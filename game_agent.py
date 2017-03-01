@@ -242,7 +242,8 @@ class CustomPlayer:
         #print ("DEPTH",depth,maximizing_player)
         if ( maximizing_player):
             score_player=self
-            move_player=game.inactive_player
+            move_player=game.active_player
+            
         else:
             score_player=self
             #move_player=self
@@ -250,6 +251,7 @@ class CustomPlayer:
             
         if depth == 0:
             score=self.score(game,score_player)
+            print (maximizing_player,game.active_player,game.inactive_player)
             m=game.get_player_location(move_player)
             print("depth=0",depth,maximizing_player,score,m)
             return score,m
@@ -264,7 +266,8 @@ class CustomPlayer:
         print("SCORES =",scores)
         for m in legal_moves:
             print("player is moving to ",m, "maximizing?", maximizing_player,"depth",depth)
-            scores.append(self.minimax(game.forecast_move(m), depth-1, not maximizing_player))
+            children_score,children_move=self.minimax(game.forecast_move(m), depth-1, not maximizing_player)
+            scores.append([children_score,m])
             
         #find best score/move
         best_score,best_move=scores[0]
