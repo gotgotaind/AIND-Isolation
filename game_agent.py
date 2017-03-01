@@ -174,9 +174,14 @@ class CustomPlayer:
             #_, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
             scores=[]            
             for m in legal_moves:
+                
+                #Maximizing set to false because as we have already 
+                #forcasted our move, so in game.forecast_move(m),
+                #it's the opponent turn to play
                 score,move=self.minimax(game.forecast_move(m), search_depth, False)
                 scores.append(score,m)
-
+                
+            #find the maximum score and corresponding move
             best_score,best_move=scores[0]
             for score,m in scores:
                 if score > best_score:
@@ -227,53 +232,27 @@ class CustomPlayer:
                 to pass the project unit tests; you cannot call any other
                 evaluation function directly.
         """
-        
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-    
-        # TODO: finish this function!
-        legal_moves=game.get_legal_moves()
-        
- #       print(depth,maximizing_player,legal_moves)
- #       print(game.to_string())
-        pass
-        #print(depth,legal_moves,game.inactive_player)
-        #print ("DEPTH",depth,maximizing_player)
-        if ( maximizing_player):
-            score_player=self
-            move_player=game.active_player
-            
-        else:
-            score_player=self
-            #move_player=self
-            move_player=game.inactive_player
-            
-        if depth == 0:
-            score=self.score(game,score_player)
-            print (maximizing_player,game.active_player,game.inactive_player)
-            m=game.get_player_location(move_player)
-            print("depth=0",depth,maximizing_player,score,m)
+        if (depth == 0):
+            score=self.score(game,self)
+            m=game.get_player_location(game.inactive_player)
             return score,m
-        
+ 
+
+        legal_moves=game.get_legal_moves()       
         if not legal_moves:
-            score=self.score(game,score_player)
-            m=game.get_player_location(move_player)
-            print("no legal moves",depth,maximizing_player,score,m)
-            return score,m
+            return self.score(game,self),(-1,-1)
        
         scores=[]
-        print("SCORES =",scores)
         for m in legal_moves:
-            print("player is moving to ",m, "maximizing?", maximizing_player,"depth",depth)
             children_score,children_move=self.minimax(game.forecast_move(m), depth-1, not maximizing_player)
             scores.append([children_score,m])
             
         #find best score/move
         best_score,best_move=scores[0]
-        print("scores",depth,maximizing_player,scores)
         for score,m in scores:
-            #print(score,m)
             if maximizing_player:
                 if score > best_score:
                     best_score=score
@@ -282,8 +261,7 @@ class CustomPlayer:
                 if score < best_score:
                     best_score=score
                     best_move=m
-        print("best is ",best_score,best_move)
-       # return best_score,game.get_player_location(game.active_player)             
+
         return best_score,best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
