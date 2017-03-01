@@ -178,7 +178,11 @@ class CustomPlayer:
                 #Maximizing set to false because as we have already 
                 #forcasted our move, so in game.forecast_move(m),
                 #it's the opponent turn to play
-                score,move=self.minimax(game.forecast_move(m), search_depth, False)
+                if method=="alphabeta":
+                    score,move=self.alphabeta(game.forecast_move(m), search_depth, False)
+                else:
+                    score,move=self.minimax(game.forecast_move(m), search_depth, False)
+                
                 scores.append(score,m)
                 
             #find the maximum score and corresponding move
@@ -247,8 +251,8 @@ class CustomPlayer:
        
         scores=[]
         for m in legal_moves:
-            children_score,children_move=self.minimax(game.forecast_move(m), depth-1, not maximizing_player)
-            scores.append([children_score,m])
+            child_score,child_move=self.minimax(game.forecast_move(m), depth-1, not maximizing_player)
+            scores.append([child_score,m])
             
         #find best score/move
         best_score,best_move=scores[0]
@@ -264,7 +268,7 @@ class CustomPlayer:
 
         return best_score,best_move
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True,lowest_possible=0,highest_possible=49):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 
@@ -305,5 +309,74 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if (depth == 0):
+            score=self.score(game,self)
+            m=game.get_player_location(game.inactive_player)
+            return score,m
+ 
+
+        legal_moves=game.get_legal_moves()       
+        if not legal_moves:
+            return self.score(game,self),(-1,-1)
+       
+        scores=[]
+        
+        for m in legal_moves:
+            child_score,child_move=self.alphabeta(game.forecast_move(m), depth-1, not maximizing_player,lowest_possible,highest_possible)
+            scores.append([child_score,m])
+            if maximizing_player:
+                if child_score<highest_possible:
+                    #just not a great move
+                    pass
+                if child_score==highest_possible:
+                    #wont get any better
+                    break
+                if child_score>highest_possible:
+                    print("child_score>highest isn't that impossible?")
+                
+                if child_score>lowest_possible:
+                    lowest_possible=child_score
+                if child_score<lowest_possible:
+                    print("child_score<lowest isn't that impossible?")
+                if child_score==lowest_possible:
+                    #worst move ever
+                    pass
+                
+            #if minimizing level
+            if not maximizing_player:
+                if child_score<highest_possible:
+                    highest_possible=child_score
+                if child_score>highest_possible:
+                    print("child_score>highest isn't that impossible? while minimizing")
+                if child_score==highest_possible:
+                    #worst move ever
+                    pass
+                
+                if child_score==lowest_possible:
+                    #won't get any better:
+                    break
+                if child_score>lowest_possible:
+                    #just not a great move
+                    pass
+                if child_score<lowest_possible:
+                    print("child_score<lowest isn't that impossible? while minimizing")
+                    
+                
+                    
+                
+            
+                    
+            
+        #find best score/move
+        best_score,best_move=scores[0]
+        for score,m in scores:
+            if maximizing_player:
+                if score > best_score:
+                    best_score=score
+                    best_move=m
+            else:
+                if score < best_score:
+                    best_score=score
+                    best_move=m
+
+        return best_score,best_move
