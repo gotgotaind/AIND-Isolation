@@ -179,7 +179,7 @@ class CustomPlayer:
                 #forcasted our move, so in game.forecast_move(m),
                 #it's the opponent turn to play
                 if method=="alphabeta":
-                    score,move=self.alphabeta(game.forecast_move(m), search_depth, False)
+                    score,move=self.alphabeta(game.forecast_move(m), search_depth,0,game.width*game.height, False)
                 else:
                     score,move=self.minimax(game.forecast_move(m), search_depth, False)
                 
@@ -268,7 +268,7 @@ class CustomPlayer:
 
         return best_score,best_move
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True,lowest_possible=0,highest_possible=49):
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 
@@ -318,48 +318,53 @@ class CustomPlayer:
         legal_moves=game.get_legal_moves()       
         if not legal_moves:
             return self.score(game,self),(-1,-1)
-       
-        scores=[]
-        
+        print ("alpha,beta,depth",alpha,beta,depth)
+        scores=[]         
         for m in legal_moves:
-            child_score,child_move=self.alphabeta(game.forecast_move(m), depth-1, not maximizing_player,lowest_possible,highest_possible)
+            child_score,child_move=self.alphabeta(game.forecast_move(m), depth-1,alpha,beta, not maximizing_player)
             scores.append([child_score,m])
             if maximizing_player:
-                if child_score<highest_possible:
+                if child_score<beta:
                     #just not a great move
                     pass
-                if child_score==highest_possible:
+                if child_score==beta:
                     #wont get any better
                     break
-                if child_score>highest_possible:
-                    print("child_score>highest isn't that impossible?")
+                if child_score>beta:
+                    print("maximizing and child_score>highest isn't that impossible?",child_score,beta,depth)
+                    break
+                     
                 
-                if child_score>lowest_possible:
-                    lowest_possible=child_score
-                if child_score<lowest_possible:
-                    print("child_score<lowest isn't that impossible?")
-                if child_score==lowest_possible:
+                if child_score>alpha:
+                    alpha=child_score
+                if child_score<alpha:
+                    print("maximizing and child_score<lowest isn't that impossible?",child_score,alpha,depth)
+
+                    
+                if child_score==alpha:
                     #worst move ever
                     pass
                 
             #if minimizing level
             if not maximizing_player:
-                if child_score<highest_possible:
-                    highest_possible=child_score
-                if child_score>highest_possible:
-                    print("child_score>highest isn't that impossible? while minimizing")
-                if child_score==highest_possible:
+                if child_score<beta:
+                    beta=child_score
+                if child_score>beta:
+                    print("minimizing and child_score>highest isn't that impossible?",child_score,beta,depth)
+                    
+                if child_score==beta:
                     #worst move ever
                     pass
                 
-                if child_score==lowest_possible:
+                if child_score==alpha:
                     #won't get any better:
                     break
-                if child_score>lowest_possible:
+                if child_score>alpha:
                     #just not a great move
                     pass
-                if child_score<lowest_possible:
-                    print("child_score<lowest isn't that impossible? while minimizing")
+                if child_score<alpha:
+                    print("minimizing and child_score<lowest isn't that impossible?",child_score,alpha,depth)
+                    break
                     
                 
                     
