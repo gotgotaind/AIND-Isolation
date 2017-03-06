@@ -78,6 +78,23 @@ def custom_score(game, player):
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     return float(own_moves - opp_moves)
 
+def best_score_move(scores,maximizing_player):
+    #find best score/move
+    #yes there is probably a lambda thingy which makes the same thing in one line
+    #but this I understand well, lambda thingies not so well
+    best_score,best_move=scores[0]
+    for score,m in scores:
+        if maximizing_player:
+            if score > best_score:
+                best_score=score
+                best_move=m
+        else:
+            if score < best_score:
+                best_score=score
+                best_move=m
+                
+    return best_score,best_move
+
 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
@@ -161,7 +178,11 @@ class CustomPlayer:
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
-
+        if not legal_moves:
+               return (-1, -1)
+            #_, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+            
+        best_move=legal_moves[0]
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
@@ -169,38 +190,54 @@ class CustomPlayer:
             # when the timer gets close to expiring
             
             
-            if not legal_moves:
-                return (-1, -1)
-            #_, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
-            scores=[]            
-            for m in legal_moves:
-                
-                #Maximizing set to false because as we have already 
-                #forcasted our move, so in game.forecast_move(m),
-                #it's the opponent turn to play
-                if method=="alphabeta":
-                    score,move=self.alphabeta(game.forecast_move(m), search_depth,0,game.width*game.height, False)
-                else:
-                    score,move=self.minimax(game.forecast_move(m), search_depth, False)
-                
-                scores.append(score,m)
-                
-            #find the maximum score and corresponding move
-            best_score,best_move=scores[0]
-            for score,m in scores:
-                if score > best_score:
-                    best_score=score
-                    best_move=m
 
-            return best_move
-            pass
+            search_depth=self.search_depth
+            iterative=self.iterative
+            
+            #if it's iterative, we always start at search depth 0 and search indefinitely
+            #untill timeout
+            #if it's not iterative, we just search at the provided search depth
+            current_search_depth=0
+            while True:
+
+                if not iterative:
+                    current_search_depth=search_depth
+                
+                scores=[]            
+                for m in legal_moves:
+                    
+                    
+    
+                    #Maximizing set to false because as we have already 
+                    #forcasted our move, so in game.forecast_move(m),
+                    #it's the opponent turn to play
+                    if self.method=="alphabeta":
+                        score,move=self.alphabeta(game.forecast_move(m), current_search_depth,0,game.width*game.height, False)
+                    else:
+                        score,move=self.minimax(game.forecast_move(m), current_search_depth, False)
+                    
+                    scores.append([score,m])
+                    
+                #find the maximum score and corresponding move
+                best_score,best_move=best_score_move(scores,True)
+                        
+                #will go on deeper indefinitely if it's iterative search
+                #else we will stop because we searched at the specified search_depth
+                if iterative:
+                    current_search_depth=current_search_depth+1
+                else:
+                    return best_move
+    
+            
+            
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
+            return best_move
             pass
 
         # Return the best move from the last completed search iteration
-        raise NotImplementedError
+
 
 
 
@@ -238,33 +275,30 @@ class CustomPlayer:
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
-
+            
+        #if depth is 0, it is a leaf in the tree, and we just return the score of our player
+        #note that I also return the location of the player that made the last move
+        #which can be the location of our player or the opponent depending on who has played last
         if (depth == 0):
             score=self.score(game,self)
             m=game.get_player_location(game.inactive_player)
             return score,m
  
 
-        legal_moves=game.get_legal_moves()       
+        legal_moves=game.get_legal_moves()      
+        
+        #if there is no moves possible, return our score and -1,-1 as location   
         if not legal_moves:
             return self.score(game,self),(-1,-1)
        
         scores=[]
         for m in legal_moves:
+            #we alternate maximizing and minimizing levels, that's why maximizing is negated
             child_score,child_move=self.minimax(game.forecast_move(m), depth-1, not maximizing_player)
             scores.append([child_score,m])
             
-        #find best score/move
-        best_score,best_move=scores[0]
-        for score,m in scores:
-            if maximizing_player:
-                if score > best_score:
-                    best_score=score
-                    best_move=m
-            else:
-                if score < best_score:
-                    best_score=score
-                    best_move=m
+        #find the best score and corresponding move
+        best_score,best_move=best_score_move(scores,maximizing_player)
 
         return best_score,best_move
 
@@ -309,6 +343,9 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
+        #if depth is 0, it is a leaf in the tree, and we just return the score of our player
+        #note that I also return the location of the player that made the last move
+        #which can be the location of our player or the opponent depending on who has played last
         if (depth == 0):
             score=self.score(game,self)
             m=game.get_player_location(game.inactive_player)
@@ -316,72 +353,76 @@ class CustomPlayer:
  
 
         legal_moves=game.get_legal_moves()       
+        
+        #if there is no moves possible, return our score and -1,-1 as location        
         if not legal_moves:
             return self.score(game,self),(-1,-1)
-        print ("alpha,beta,depth",alpha,beta,depth)
+        
         scores=[]         
         for m in legal_moves:
+            #we alternate maximizing and minimizing levels, that's why maximizing is negated
             child_score,child_move=self.alphabeta(game.forecast_move(m), depth-1,alpha,beta, not maximizing_player)
             scores.append([child_score,m])
+            
             if maximizing_player:
+                
                 if child_score<beta:
-                    #just not a great move
+                    #just not the best move possible.
+                    #continue to search to see is there is a better one in this branch
                     pass
                 if child_score==beta:
-                    #wont get any better
+                    #that's the bests possible score, we can stop here
                     break
                 if child_score>beta:
-                    print("maximizing and child_score>highest isn't that impossible?",child_score,beta,depth)
+                    #now that I write a comment here, I'm not sure why this happens
+                    #and why I should break here.
+                    #probably because the node above is a minimizing node and this is 
+                    #the opponent turn, so we don't really want his score to be so high?
+                    #Yes. That's must be it. Another branch has a lower score for us.
+                    #So the opponent will chose this other branch, not this one.
+                    #So no need to continue searching.
                     break
-                     
-                
+                                     
                 if child_score>alpha:
+                    #we're maximizing, so this is a new lower bound
                     alpha=child_score
                 if child_score<alpha:
-                    print("maximizing and child_score<lowest isn't that impossible?",child_score,alpha,depth)
-
-                    
+                    #now that I write a comment here, I wonder if something special
+                    #should happen here...
+                    #unit tests fails if we break
+                    pass                    
                 if child_score==alpha:
-                    #worst move ever
+                    #worst move possible, but it happens... Nothing special to do
+                    #units tests fails if we break
                     pass
                 
             #if minimizing level
             if not maximizing_player:
+                
                 if child_score<beta:
+                    #we're minimizing, so this is a new upper bound
                     beta=child_score
                 if child_score>beta:
-                    print("minimizing and child_score>highest isn't that impossible?",child_score,beta,depth)
-                    
+                    #now that I write a comment here, I'm not sure why this happens
+                    #and maybe something special should happen here...
+                    ###! unit tests doesnt fail if we break
+                    pass
                 if child_score==beta:
-                    #worst move ever
+                    #just not a good move from our player point of view
+                    #unit tests fails if we break
                     pass
                 
                 if child_score==alpha:
-                    #won't get any better:
+                    #ok, that's a bad score, no need to search the other branches, even if
+                    #another have a better score, this is the one the opponent will chose
                     break
                 if child_score>alpha:
-                    #just not a great move
+                    #just not the worst move, lets see the other nodes...
                     pass
                 if child_score<alpha:
-                    print("minimizing and child_score<lowest isn't that impossible?",child_score,alpha,depth)
+                    #this move is so bad, that it's even lower than another branch we already search
                     break
                     
-                
-                    
-                
-            
-                    
-            
-        #find best score/move
-        best_score,best_move=scores[0]
-        for score,m in scores:
-            if maximizing_player:
-                if score > best_score:
-                    best_score=score
-                    best_move=m
-            else:
-                if score < best_score:
-                    best_score=score
-                    best_move=m
+        best_score,best_move=best_score_move(scores,maximizing_player)
 
         return best_score,best_move
