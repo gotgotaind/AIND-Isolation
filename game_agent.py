@@ -8,6 +8,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
+import math
 
 
 class Timeout(Exception):
@@ -43,6 +44,21 @@ def open_move_score(game, player):
 
     return float(len(game.get_legal_moves(player)))
 
+def improved_score_with_distance_from_center_effect(game, player):
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    center_x=(game.width-1)/2.0
+    center_y=(game.height-1)/2.0
+    center_x_d=game.get_player_location(player)[0]-center_x
+    center_y_d=game.get_player_location(player)[1]-center_y
+    center_d=(center_x_d**2+center_y_d**2)
+    max_distance=(((game.width-1)/2.0)**2+((game.height-1)/2.0)**2)
+    distance_factor=1-center_d/(max_distance+1)
+    
+    #return float(own_moves - opp_moves)+distance_factor
+    return float(own_moves)-opp_moves+distance_factor
+
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -74,9 +90,8 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+
+    return improved_score_with_distance_from_center_effect(game, player)
 
 def best_score_move(scores,maximizing_player):
     #find best score/move
@@ -126,7 +141,7 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=open_move_score,
+    def __init__(self, search_depth=3, score_fn=custom_score,
                  iterative=True, method='minimax', timeout=10.):
         self.search_depth = search_depth
         self.iterative = iterative
