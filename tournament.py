@@ -34,7 +34,8 @@ from game_agent import CustomPlayer
 from game_agent import custom_score
 
 NUM_MATCHES = 5  # number of matches against each opponent
-TIME_LIMIT = 150  # number of milliseconds before timeout
+#TIME_LIMIT = 150  # number of milliseconds before timeout
+TIME_LIMIT = 1500  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -137,10 +138,14 @@ def play_round(agents, num_matches):
 
 def main():
 
-    HEURISTICS = [("Null", null_score),
-                  ("Open", open_move_score),
-                  ("Improved", improved_score)]
-    AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
+#change back before posting project.
+#    HEURISTICS = [("Null", null_score),
+#                  ("Open", open_move_score),
+#                  ("Improved", improved_score)]
+    HEURISTICS = [("Improved", improved_score)]    
+    
+    #AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
+    AB_ARGS = {"search_depth": 2, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
 
@@ -163,6 +168,10 @@ def main():
     test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
 
+    test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "ID_Improved"),
+                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+    
+
     print(DESCRIPTION)
     for agentUT in test_agents:
         print("")
@@ -170,7 +179,9 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents = random_agents + mm_agents + ab_agents + [agentUT]
+        #agents = random_agents + mm_agents + ab_agents + [agentUT]
+        #to test faster... Change back before posting...
+        agents = ab_agents + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
         print("\n\nResults:")

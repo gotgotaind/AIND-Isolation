@@ -46,7 +46,17 @@ def open_move_score(game, player):
 
 def improved_score_with_distance_from_center_effect(game, player):
     own_moves = len(game.get_legal_moves(player))
+    
+    #replaces the is_loser call. gaining time most of the time
+    if own_moves==0:
+        return float("-inf")
+    
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    #replaces the is_winner call. gaining time most of the time
+    if opp_moves==0:
+        return float("+inf")
+    
     
     center_x=(game.width-1)/2.0
     center_y=(game.height-1)/2.0
@@ -58,6 +68,85 @@ def improved_score_with_distance_from_center_effect(game, player):
     
     #return float(own_moves - opp_moves)+distance_factor
     return float(own_moves)-opp_moves+distance_factor
+
+#same than improved_score_with_distance_from_center_effect
+#but with a simpler distance from center evaluation
+def improved_score_with_distance_from_center_effect2(game, player):
+    own_moves = len(game.get_legal_moves(player))
+    
+    #replaces the is_loser call. gaining time most of the time
+    if own_moves==0:
+        return float("-inf")
+    
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    #replaces the is_winner call. gaining time most of the time
+    if opp_moves==0:
+        return float("+inf")
+    
+
+    center_x=(game.width-1)/2
+    center_y=(game.height-1)/2
+    center_x_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
+    center_y_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
+    distance_factor=1-center_x_d-center_y_d
+    
+    #return float(own_moves - opp_moves)+distance_factor
+    score=own_moves-opp_moves+distance_factor
+    return score
+
+
+def count_legal_moves(game, player,threshold):
+    """
+    count the possible moves for an L-shaped motion (like a
+    knight in chess). stop counting if threshold reached
+    """
+    count=0
+    
+    r, c = game.get_player_location(player)
+
+    directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2),
+                  (1, -2),  (1, 2), (2, -1),  (2, 1)]
+
+    for dr, dc in directions:
+        if game.move_is_legal((r+dr, c+dc)):
+            count=count+1
+            if count >= threshold:
+                return count
+            
+    return count
+   
+    
+def improved_score_with_distance_from_center_effect_and_less_possible_values(game, player):
+    
+    threshold=7    
+    own_moves = count_legal_moves(game, player,threshold)
+#    own_moves_testing = len(game.get_legal_moves(player))
+    #replaces the is_loser call. gaining time most of the time
+    if own_moves==0:
+        return float("-inf")
+    
+    opp_moves = count_legal_moves(game, game.get_opponent(player),1)
+#    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
+    #replaces the is_winner call. gaining time most of the time
+    if opp_moves==0:
+        return float("+inf")
+
+    
+
+    center_x=(game.width-1)/2
+    center_y=(game.height-1)/2
+    center_x_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
+    center_y_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
+    distance_factor=1-center_x_d-center_y_d
+    if distance_factor>0.5:
+        distance_factor=1
+    else:
+        distance_factor=0
+    
+    #return float(own_moves - opp_moves)+distance_factor
+    score=own_moves+distance_factor
+    return score
 
 
 def custom_score(game, player):
@@ -83,15 +172,16 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: finish this function!
-    if game.is_loser(player):
-        return float("-inf")
+    # will manage with the get legal moves inside my custom score
+    # must uncomment if I no longer count legal moves for both players!
+    #    if game.is_loser(player):
+    #        return float("-inf")
+    #
+    #    if game.is_winner(player):
+    #        return float("inf")
 
-    if game.is_winner(player):
-        return float("inf")
 
-
-    return improved_score_with_distance_from_center_effect(game, player)
+    return improved_score_with_distance_from_center_effect_and_less_possible_values(game, player)
 
 def best_score_move(scores,maximizing_player):
     #find best score/move
@@ -248,6 +338,7 @@ class CustomPlayer:
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
+            print("search_depth",current_search_depth)
             return best_move
             pass
 
