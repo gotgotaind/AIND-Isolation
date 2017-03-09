@@ -148,6 +148,23 @@ def improved_score_with_distance_from_center_effect_and_less_possible_values(gam
     score=own_moves+distance_factor
     return score
 
+def survive_score(game, player):
+    
+    threshold=7    
+    own_moves = count_legal_moves(game, player,1)
+#    own_moves_testing = len(game.get_legal_moves(player))
+    #replaces the is_loser call. gaining time most of the time
+    if own_moves==0:
+        return float("-inf")
+    
+    opp_moves = count_legal_moves(game, game.get_opponent(player),1)
+#    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
+    #replaces the is_winner call. gaining time most of the time
+    if opp_moves==0:
+        return float("+inf")
+
+    score=own_moves
+    return float(score)
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -181,7 +198,7 @@ def custom_score(game, player):
     #        return float("inf")
 
 
-    return improved_score_with_distance_from_center_effect_and_less_possible_values(game, player)
+    return survive_score(game, player)
 
 def best_score_move(scores,maximizing_player):
     #find best score/move
