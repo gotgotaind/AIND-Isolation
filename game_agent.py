@@ -74,56 +74,8 @@ def open_move_score(game, player):
 
     return float(len(game.get_legal_moves(player)))
 
-def improved_score_with_distance_from_center_effect(game, player):
-    own_moves = len(game.get_legal_moves(player))
-    
-    #replaces the is_loser call. gaining time most of the time
-    if own_moves==0:
-        return float("-inf")
-    
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    
-    #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0:
-        return float("+inf")
-    
-    
-    center_x=(game.width-1)/2.0
-    center_y=(game.height-1)/2.0
-    center_x_d=game.get_player_location(player)[0]-center_x
-    center_y_d=game.get_player_location(player)[1]-center_y
-    center_d=(center_x_d**2+center_y_d**2)
-    max_distance=(((game.width-1)/2.0)**2+((game.height-1)/2.0)**2)
-    distance_factor=1-center_d/(max_distance+1)
-    
-    #return float(own_moves - opp_moves)+distance_factor
-    return float(own_moves)-opp_moves+distance_factor
 
-#same than improved_score_with_distance_from_center_effect
-#but with a simpler distance from center evaluation
-def improved_score_with_distance_from_center_effect2(game, player):
-    own_moves = len(game.get_legal_moves(player))
-    
-    #replaces the is_loser call. gaining time most of the time
-    if own_moves==0:
-        return float("-inf")
-    
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    
-    #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0:
-        return float("+inf")
-    
 
-    center_x=(game.width-1)/2
-    center_y=(game.height-1)/2
-    center_x_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
-    center_y_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
-    distance_factor=1-center_x_d-center_y_d
-    
-    #return float(own_moves - opp_moves)+distance_factor
-    score=own_moves-opp_moves+distance_factor
-    return score
 
 
 def count_legal_moves(game, player,threshold):
@@ -144,43 +96,11 @@ def count_legal_moves(game, player,threshold):
             if count >= threshold:
                 return count
             
-    return count
-   
-    
-def improved_score_with_distance_from_center_effect_and_less_possible_values(game, player):
-    
-    threshold=1    
-    own_moves = count_legal_moves(game, player,threshold)
-#    own_moves_testing = len(game.get_legal_moves(player))
-    #replaces the is_loser call. gaining time most of the time
-    if own_moves==0:
-        return float("-inf")
-    
-    opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
-#    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
-    #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0:
-        return float("+inf")
-
-    
-
-    center_x=(game.width-1)/2
-    center_y=(game.height-1)/2
-    center_x_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
-    center_y_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
-    distance_factor=1-center_x_d-center_y_d
-#    if distance_factor>0.5:
-#        distance_factor=1
-#    else:
-#        distance_factor=0
-    
-    #return float(own_moves - opp_moves)+distance_factor
-    score=own_moves - opp_moves+distance_factor
-    return score
+    return count 
 
 def improved_score_with_distance_factors(game, player):
     
-    threshold=7    
+    threshold=8    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
@@ -194,42 +114,32 @@ def improved_score_with_distance_factors(game, player):
         return float("+inf")
 
     
-    if ( game.active_player == player ):
+#    if ( game.active_player == player ):
 
-        center_x=(game.width-1)/2
-        center_y=(game.height-1)/2
+
+    center_x=(game.width-1)/2
+    center_y=(game.height-1)/2
                  
-        center_x_opp_d=abs(game.get_player_location(game.get_opponent(player))[0]-center_x)/float(game.width)
-        center_y_opp_d=abs(game.get_player_location(game.get_opponent(player))[1]-center_y)/float(game.height)
-        distance_factor_opp=1-center_x_opp_d-center_y_opp_d
+#        center_x_opp_d=abs(game.get_player_location(game.get_opponent(player))[0]-center_x)/float(game.width)
+#        center_y_opp_d=abs(game.get_player_location(game.get_opponent(player))[1]-center_y)/float(game.height)
+#        distance_factor_opp=1-center_x_opp_d-center_y_opp_d
         
-        center_x_me_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
-        center_y_me_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
-        distance_factor_own=1-center_x_me_d-center_y_me_d
-    else:
-
-        distance_factor_own=0
-        distance_factor_opp=0
-    
-    
-#    center_x_d=abs(game.get_player_location(player)[0]-game.get_player_location(game.get_opponent(player))[0])/float(game.width)
-#    center_y_d=abs(game.get_player_location(player)[1]-game.get_player_location(game.get_opponent(player))[1])/float(game.height)
-#    distance_factor=1-center_x_d-center_y_d
-    
-#    if distance_factor>0.5:
-#        distance_factor=1
+    center_x_me_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
+    center_y_me_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
+    distance_factor_own=1-center_x_me_d-center_y_me_d
 #    else:
-#        distance_factor=0
+#
+#        distance_factor_own=0
+#        distance_factor_opp=0
     
-    
-    score=own_moves-opp_moves+distance_factor_own-distance_factor_opp
+    score=own_moves-opp_moves+distance_factor_own
 
     return score
 
 
 def survive_score(game, player):
     
-    threshold=7    
+    threshold=1    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
@@ -244,6 +154,36 @@ def survive_score(game, player):
 
     score=own_moves
     return float(score)
+
+def opp_open_move_score(game, player):
+    """The basic evaluation function described in lecture that outputs a score
+    equal to the number of moves open for your computer player on the board.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    return 8-float(len(game.get_legal_moves(game.get_opponent(player))))
+
+
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -394,38 +334,43 @@ class CustomPlayer:
             search_depth=self.search_depth
             iterative=self.iterative
             method=self.method
-            maximizing=True      
+            maximizing=True
+            
+            debug=False
+            
+            #depth level alphabeta with ordering should continue to
+            #record ordered scores/moves
+            ordering_depth=0
             
             #if it's iterative, we always start at search depth 0 and search indefinitely
             #untill timeout (in fact we'll stop when the depth is more than the size
             #of the grid. No point in search deeper.)
             #if it's not iterative, we just search at the provided search depth
-            
-            
             if iterative:
                 current_search_depth=0
-                scores=[]
+                
+                #dictionary of moves/scores used by the alphabeta with ordering function
+                best_scores_dict={}
+                #if fact with stop if depth is more than the size of the board
+                #no need to go indefinitely
                 while current_search_depth<(game.width*game.height):
+                    scores=[]
                     for m in legal_moves:
-                    
+                        
 
-
-                    
-                             
-                        best_scores_dict={}
-                    
                         if method=="alphabeta":
-                            
-                            score,move=self.alphabeta_with_ordering(game.forecast_move(m),current_search_depth, best_scores_dict,str(m),float("-inf"),float("+inf"),not  maximizing)
-                        else:
-                            #print("minimax",current_search_depth)
-                            
+                            #use alphabeta with ordering depending on ordering_depth value
+                            if ordering_depth>0:
+                                score,move=self.alphabeta_with_ordering(game.forecast_move(m),current_search_depth,current_search_depth,ordering_depth,best_scores_dict,str(m),float("-inf"),float("+inf"),not  maximizing)
+                            else:
+                                score,move=self.alphabeta(game.forecast_move(m),current_search_depth,float("-inf"),float("+inf"),not  maximizing)
+                        else:                            
                             score,move=self.minimax(game.forecast_move(m), current_search_depth,not maximizing)
-                            #print("minimaxa")
 
                             
                         scores.append([score,m])
-                                                
+                        best_scores_dict[m]=scores
+                                        
                     #copy the scores before they are reinitialized in the next iteration
                     #we'll use those scores in case of timeout
                     #better to use the scores from a lower search depth than the partial scores
@@ -433,16 +378,13 @@ class CustomPlayer:
                     #(the timeout could even occur while we don't even have evaluated one move
                     #in which case scores would be empty)
                     last_scores=scores
-                    #print("last_scores",last_scores)
                     current_search_depth=current_search_depth+1
-                        
-
-                            
+                                                    
             #not iterative
             else:
                 
-                #a voir pourquoi dans le tournament, on a timeout ici 
-                #sur un id_improved vs ab_null
+                #once we had a timeout here during an id_improved vs ab_null
+                #maybe should check if something is wrong as it's not supposed to happen
                 last_scores=[] 
                 for m in legal_moves:
                     if method=="alphabeta":
@@ -454,25 +396,23 @@ class CustomPlayer:
                 #find the maximum score and corresponding move
                 best_score,best_move=best_score_move(last_scores,maximizing)
                 return best_move
-            
-            
+            if debug:
+                print("scores",last_scores)
+                print("depth",current_search_depth)
                         
         except Timeout:
             # Handle any actions required at timeout, if necessary            
-            #print('TIMEOUT!')
-            #print("game.move_count,current_search_depth,self.score(game,game.active_player),self.score(game,game.inactive_player()),self.score")
-#            print(game.move_count,current_search_depth,self.score(game,game.active_player),self.score(game,game.inactive_player),self.score)
-            #print("scores",last_scores)
+            if debug:
+                print("scores",last_scores)
+                print("depth",current_search_depth)
+                
             best_score,best_move=best_score_move(last_scores,maximizing)
             return best_move
             pass
 
-        # Return the best move from the last completed search iteration
-        #print("game.move_count,current_search_depth,self.score(game,game.active_player),self.score(game,game.inactive_player()),self.score")
-        #print(game.move_count,current_search_depth,self.score(game,game.active_player),self.score(game,game.inactive_player),self.score)
-        #print("scores",last_scores)
-        
-        
+        #Return the best move from the last completed search iteration
+        #(we may not have timeout because we don't really search indefinitely. We stop 
+        #is search depth is more than the board size)
         best_score,best_move=best_score_move(last_scores,maximizing)
         return best_move
 
@@ -664,7 +604,7 @@ class CustomPlayer:
         return best_score,best_move
     
 
-    def alphabeta_with_ordering(self, game,depth,best_scores_dict,parent_moves,alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
+    def alphabeta_with_ordering(self, game,initial_depth,depth,ordering_depth,best_scores_dict,parent_moves,alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 
@@ -720,12 +660,25 @@ class CustomPlayer:
         #this list of moves is ordered by the previously evaluated scores
         #which should allow more 'alphabeta' pruning
         #it also avoids a call to get_legal_moves
-        if( parent_moves in best_scores_dict ):
-            legal_moves=[]
-            for score,move in best_scores_dict[parent_moves]:
-                legal_moves.append(move)
+        if (initial_depth - depth)<=ordering_depth:
+            if( parent_moves in best_scores_dict ):
+                legal_moves=[]
+                for score,move in best_scores_dict[parent_moves]:
+                    legal_moves.append(move)
+                if initial_depth==3 and depth==2:
+                    pass
+                    #print("YO")
+                    
+            else:
+                legal_moves=game.get_legal_moves() 
+                if initial_depth==3 and depth==2:
+                    pass
+                    #print("YA")
         else:
-            legal_moves=game.get_legal_moves()       
+            legal_moves=game.get_legal_moves()
+            if initial_depth==3 and depth==2:
+                pass
+                #print("YU")
         
         #if there is no moves possible, return our score and -1,-1 as location        
         if not legal_moves:
@@ -735,7 +688,7 @@ class CustomPlayer:
          
         for m in legal_moves:
             #we alternate maximizing and minimizing levels, that's why maximizing is negated
-            child_score,child_move=self.alphabeta_with_ordering(game.forecast_move(m),depth-1,best_scores_dict,parent_moves+'-'+str(m),alpha,beta, not maximizing_player)
+            child_score,child_move=self.alphabeta_with_ordering(game.forecast_move(m),initial_depth,depth-1,ordering_depth,best_scores_dict,parent_moves+'-'+str(m),alpha,beta, not maximizing_player)
 
             
             #add score to scores already sorted
@@ -825,6 +778,7 @@ class CustomPlayer:
         #best_score,best_move=best_score_move(scores,maximizing_player)
         #scores is sorted now. The first element is the best.
         best_score,best_move=scores[0]
-        best_scores_dict[parent_moves]=scores
+        if (initial_depth - depth)<=ordering_depth:
+            best_scores_dict[parent_moves]=scores
         
         return best_score,best_move

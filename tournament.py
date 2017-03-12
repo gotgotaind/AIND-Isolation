@@ -34,7 +34,6 @@ from game_agent import CustomPlayer
 from game_agent import custom_score
 
 NUM_MATCHES = 5  # number of matches against each opponent
-#TIME_LIMIT = 150  # number of milliseconds before timeout
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -82,25 +81,20 @@ def play_match(player1, player2):
 
         if player1 == winner:
             num_wins[player1] += 1
-#            print("player 1 wins")
+
             if termination == "timeout":
                 num_timeouts[player2] += 1
-#                print("player 2 timeout")
             else:
                 num_invalid_moves[player2] += 1
-                                 
 
         elif player2 == winner:
 
             num_wins[player2] += 1
-#            print("player 2 wins")
 
             if termination == "timeout":
                 num_timeouts[player1] += 1
-#                print("player 1 timeout")
             else:
                 num_invalid_moves[player1] += 1
-#        print("\nstate:\n{}".format(game.to_string()))
 
     if sum(num_timeouts.values()) != 0:
         warnings.warn(TIMEOUT_WARNING)
@@ -132,8 +126,6 @@ def play_round(agents, num_matches):
                 counts[p1] += score_1
                 counts[p2] += score_2
                 total += score_1 + score_2
-#                print (counts[p1],counts[p2])
-                
 
         wins += counts[agent_1.player]
 
@@ -145,13 +137,11 @@ def play_round(agents, num_matches):
 
 def main():
 
-#change back before posting project.
     HEURISTICS = [("Null", null_score),
                   ("Open", open_move_score),
                   ("Improved", improved_score)]
- 
-    MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
+    MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
 
     # Create a collection of CPU agents using fixed-depth minimax or alpha beta
@@ -173,9 +163,6 @@ def main():
     test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
 
-
-    
-
     print(DESCRIPTION)
     for agentUT in test_agents:
         print("")
@@ -184,8 +171,6 @@ def main():
         print("*************************")
 
         agents = random_agents + mm_agents + ab_agents + [agentUT]
-        #to test faster... Change back before posting...
-        #agents = ab_agents + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
         print("\n\nResults:")
