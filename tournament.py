@@ -173,8 +173,7 @@ def main():
     test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
                    Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
 
-    test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+
     
 
     print(DESCRIPTION)
