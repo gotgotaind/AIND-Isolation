@@ -116,30 +116,32 @@ def improved_score_with_distance_factors(game, player):
     
 #    if ( game.active_player == player ):
 
-
-    center_x=(game.width-1)/2
-    center_y=(game.height-1)/2
+    if ( game.move_count > 20 ):
+        center_x=(game.width-1)/2
+        center_y=(game.height-1)/2
                  
 #        center_x_opp_d=abs(game.get_player_location(game.get_opponent(player))[0]-center_x)/float(game.width)
 #        center_y_opp_d=abs(game.get_player_location(game.get_opponent(player))[1]-center_y)/float(game.height)
 #        distance_factor_opp=1-center_x_opp_d-center_y_opp_d
         
-    center_x_me_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
-    center_y_me_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
-    distance_factor_own=1-center_x_me_d-center_y_me_d
+        center_x_me_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
+        center_y_me_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
+        distance_factor_own=1-center_x_me_d-center_y_me_d
+    else:
+        distance_factor_own=0
 #    else:
 #
 #        distance_factor_own=0
 #        distance_factor_opp=0
     
-    score=own_moves-opp_moves+distance_factor_own
+    score=own_moves+distance_factor_own
 
     return score
 
 
 def survive_score(game, player):
     
-    threshold=1    
+    threshold=8    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
@@ -152,7 +154,7 @@ def survive_score(game, player):
     if opp_moves==0:
         return float("+inf")
 
-    score=own_moves
+    score=own_moves-opp_moves
     return float(score)
 
 def opp_open_move_score(game, player):
@@ -217,7 +219,7 @@ def custom_score(game, player):
     #        return float("inf")
 
 
-    return improved_score_with_distance_factors(game, player)
+    return survive_score(game, player)
 
 def best_score_move(scores,maximizing_player):
     #find best score/move

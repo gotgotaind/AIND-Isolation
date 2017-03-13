@@ -269,3 +269,7 @@ if __name__ == "__main__":
     print(game.to_string())
     print("Move history:\n{!s}".format(history))
     print("move counts:\n",game.move_count)
+    if (winner==player1):
+        print("player1 wins!")
+    else:
+        print("player2 wins!")
