@@ -92,25 +92,51 @@ def count_legal_moves(game, player,threshold):
 
     for dr, dc in directions:
         if game.move_is_legal((r+dr, c+dc)):
-            count=count+1
+            count=count+1            
             if count >= threshold:
                 return count
             
+            
     return count 
 
-def improved_score_with_distance_factors(game, player):
+def improved_score_with_distance_factor(game, player):
     
     threshold=8    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
-    if own_moves==0:
+    if own_moves==0 and game.active_player==player:
         return float("-inf")
     
     opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
 #    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
     #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0:
+    if opp_moves==0 and game.inactive_player==player:
+        return float("+inf")
+
+    center_x=(game.width-1)/2
+    center_y=(game.height-1)/2
+                       
+    center_x_me_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
+    center_y_me_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
+    distance_factor_own=1-center_x_me_d-center_y_me_d
+    
+    score=own_moves-opp_moves+distance_factor_own
+    return score
+
+def improved_score_with_distance_factor2(game, player):
+    
+    threshold=8    
+    own_moves = count_legal_moves(game, player,threshold)
+#    own_moves_testing = len(game.get_legal_moves(player))
+    #replaces the is_loser call. gaining time most of the time
+    if own_moves==0 and game.active_player==player:
+        return float("-inf")
+    
+    opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
+#    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
+    #replaces the is_winner call. gaining time most of the time
+    if opp_moves==0 and game.inactive_player==player:
         return float("+inf")
 
     
@@ -119,47 +145,68 @@ def improved_score_with_distance_factors(game, player):
     if ( game.move_count > 20 ):
         center_x=(game.width-1)/2
         center_y=(game.height-1)/2
-                 
-#        center_x_opp_d=abs(game.get_player_location(game.get_opponent(player))[0]-center_x)/float(game.width)
-#        center_y_opp_d=abs(game.get_player_location(game.get_opponent(player))[1]-center_y)/float(game.height)
-#        distance_factor_opp=1-center_x_opp_d-center_y_opp_d
-        
+                     
+            
         center_x_me_d=abs(game.get_player_location(player)[0]-center_x)/float(game.width)
         center_y_me_d=abs(game.get_player_location(player)[1]-center_y)/float(game.height)
         distance_factor_own=1-center_x_me_d-center_y_me_d
+        
+        center_x_opp_d=abs(game.get_player_location(game.get_opponent(player))[0]-center_x)/float(game.width)
+        center_y_opp_d=abs(game.get_player_location(game.get_opponent(player))[1]-center_y)/float(game.height)
+        distance_factor_opp=1-center_x_opp_d-center_y_opp_d
     else:
         distance_factor_own=0
-#    else:
-#
-#        distance_factor_own=0
-#        distance_factor_opp=0
+        distance_factor_opp=0
+        
     
-    score=own_moves+distance_factor_own
 
+
+    
+    score=own_moves-opp_moves+distance_factor_own-distance_factor_opp
     return score
 
 
-def survive_score(game, player):
+def my_improved_score(game, player):
     
     threshold=8    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
-    if own_moves==0:
+    if own_moves==0 and game.active_player==player:
         return float("-inf")
     
-    opp_moves = count_legal_moves(game, game.get_opponent(player),1)
+    opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
 #    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
     #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0:
+    if opp_moves==0 and game.inactive_player==player:
+        return float("+inf")
+
+    score=8*own_moves-opp_moves
+    return float(score)
+
+def survive_score(game, player):
+    
+    threshold=1    
+    own_moves = count_legal_moves(game, player,threshold)
+#    own_moves_testing = len(game.get_legal_moves(player))
+    #replaces the is_loser call. gaining time most of the time
+    if own_moves==0 and game.active_player==player:
+        return float("-inf")
+    
+    opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
+#    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
+    #replaces the is_winner call. gaining time most of the time
+    if opp_moves==0 and game.inactive_player==player:
         return float("+inf")
 
     score=own_moves-opp_moves
     return float(score)
 
+
+
 def opp_open_move_score(game, player):
-    """The basic evaluation function described in lecture that outputs a score
-    equal to the number of moves open for your computer player on the board.
+    """outputs a score
+    equal to the opposite of the number of moves open for the opponent player on the board.
 
     Parameters
     ----------
@@ -185,7 +232,51 @@ def opp_open_move_score(game, player):
 
     return 8-float(len(game.get_legal_moves(game.get_opponent(player))))
 
+def free_space(game, player):
+    """outputs a score
+    equal to the number of free squares around the player.
 
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
+    count=0
+    
+    r, c = game.get_player_location(player)
+
+    blank_spaces=game.get_blank_spaces()
+    
+    directions = [(-1, 1), (0, 1), (1, 1), (-1, 0),
+                  (1, 0),  (-1, -1), (0, -1),  (-1, -1)]
+#                  (-2,2),(-1,2),(0,2),(1,2),(2,2),
+#                  (-2,1),(2,1),(-2,0),(2,0),
+#                  (-2,-1),(2,-1),
+#                  (-2,-2),(-1,-2),(0,-2),(1,-2),(2,-2)]
+
+    for dr, dc in directions:
+        if (r+dr, c+dc) in blank_spaces:
+            count=count+1    
+
+    return count    
+    
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -218,8 +309,7 @@ def custom_score(game, player):
     #    if game.is_winner(player):
     #        return float("inf")
 
-
-    return survive_score(game, player)
+    return my_improved_score(game, player)
 
 def best_score_move(scores,maximizing_player):
     #find best score/move

@@ -231,8 +231,8 @@ if __name__ == "__main__":
 
     # create an isolation board (by default 7x7)
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
-    CUSTOM_ARGS2 = {"method": 'alphabeta', 'iterative': False}
-    player1 = CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS)
+    CUSTOM_ARGS2 = {"search_depth": 5,"method": 'alphabeta', 'iterative': False}
+    player1 = CustomPlayer(score_fn=open_move_score, **CUSTOM_ARGS)
     #◘player2 = RandomPlayer()
     player2 = CustomPlayer(score_fn=open_move_score, **CUSTOM_ARGS2)
     print('ya qq?')
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
     # play the remainder of the game automatically -- outcome can be "illegal
     # move" or "timeout"; it should _always_ be "illegal move" in this example
-    winner, history, outcome = game.play(time_limit=150)
+    winner, history, outcome = game.play(time_limit=1500)
     print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
     print(game.to_string())
     print("Move history:\n{!s}".format(history))
