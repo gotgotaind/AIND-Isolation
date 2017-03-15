@@ -101,18 +101,25 @@ def count_legal_moves(game, player,threshold):
 
 def improved_score_with_distance_factor(game, player):
     
-    threshold=8    
+    threshold=8   
+    
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
-    if own_moves==0 and game.active_player==player:
-        return float("-inf")
+#    if own_moves==0 and game.active_player==player:
+#        return float("-inf")
     
     opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
 #    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
     #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0 and game.inactive_player==player:
-        return float("+inf")
+#    if opp_moves==0 and game.inactive_player==player:
+#        return float("+inf")
 
     center_x=(game.width-1)/2
     center_y=(game.height-1)/2
@@ -168,18 +175,24 @@ def improved_score_with_distance_factor2(game, player):
 
 def my_improved_score(game, player):
     
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
     threshold=8    
     own_moves = count_legal_moves(game, player,threshold)
 #    own_moves_testing = len(game.get_legal_moves(player))
     #replaces the is_loser call. gaining time most of the time
-    if own_moves==0 and game.active_player==player:
-        return float("-inf")
-    
+#    if own_moves==0 and game.active_player==player:
+#        return float("-inf")
+#    
     opp_moves = count_legal_moves(game, game.get_opponent(player),threshold)
 #    opp_moves_testing = len(game.get_legal_moves(game.get_opponent(player)))   
     #replaces the is_winner call. gaining time most of the time
-    if opp_moves==0 and game.inactive_player==player:
-        return float("+inf")
+#    if opp_moves==0 and game.inactive_player==player:
+#        return float("+inf")
 
     score=8*own_moves-opp_moves
     return float(score)
@@ -309,7 +322,7 @@ def custom_score(game, player):
     #    if game.is_winner(player):
     #        return float("inf")
 
-    return my_improved_score(game, player)
+    return improved_score_with_distance_factor(game, player)
 
 def best_score_move(scores,maximizing_player):
     #find best score/move
@@ -635,6 +648,19 @@ class CustomPlayer:
             
             if maximizing_player:
                 
+                if child_score>alpha:
+                    #we're maximizing, so this is a new lower bound
+                    alpha=child_score
+                if child_score<alpha:
+                    #now that I write a comment here, I wonder if something special
+                    #should happen here...
+                    #unit tests fails if we break
+                    pass                    
+                if child_score==alpha:
+                    #worst move possible, but it happens... Nothing special to do
+                    #units tests fails if we break
+                    pass                
+                
                 if child_score<beta:
                     #just not the best move possible.
                     #continue to search to see is there is a better one in this branch
@@ -652,18 +678,7 @@ class CustomPlayer:
                     #So no need to continue searching.
                     break
                                      
-                if child_score>alpha:
-                    #we're maximizing, so this is a new lower bound
-                    alpha=child_score
-                if child_score<alpha:
-                    #now that I write a comment here, I wonder if something special
-                    #should happen here...
-                    #unit tests fails if we break
-                    pass                    
-                if child_score==alpha:
-                    #worst move possible, but it happens... Nothing special to do
-                    #units tests fails if we break
-                    pass
+
                 
             #if minimizing level
             if not maximizing_player:
